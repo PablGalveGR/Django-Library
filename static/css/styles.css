@@ -1,0 +1,13 @@
+.sidebar-nav {
+    margin-top: 20px;
+    padding: 0;
+    list-style: none;
+}
+p a {
+  text-decoration: none;
+  font-size: 1.1rem;
+}
+p a:hover{
+  text-decoration: underline;
+  color: black
+}
