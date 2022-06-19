@@ -1,0 +1,115 @@
+{% extends "base_generic.html" %}
+{% load static %}
+{% block content %}
+<main class="content">
+  <div class="container-fluid p-0">
+    <h1 class="h3 mb-3">All books</h1>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card">
+          <div class="card-header">
+
+          </div>
+          <div class="card-body">
+            <div id="datatables-basic_wrapper">
+              <div class="row">
+                <div class="col-sm-12">
+                  <table id="datatables-basic" class="table table-striped dataTable no-footer dtr-inline"
+                    style="width: 100%;">
+                    <thead>
+                      <tr role="row">
+                        <th rowspan="1" colspan="1">Book</th>
+                        <th rowspan="1" colspan="1">Author</th>
+                        <th rowspan="1" colspan="1">Summary</th>
+                        <th rowspan="1" colspan="1">ISBN</th>
+                        <th rowspan="1" colspan="1">Genre</th>
+                      </tr>
+                    </thead>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+<script src="{% static 'js/app.js'%}"></script>
+<script type="text/javascript", language="javascript"
+src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script>
+<script>
+  $(function () {
+    // Datatables basic
+    var datatablesBasic = $("#datatables-basic").DataTable({
+      responsive: true,
+      processing:true,
+      buttons:[
+        {
+          //Update the table
+          text: '<i class="fas fa-sync-alt"></i>Update</button>',
+          action: function(e,dt, node, config){
+            dt.clear().draw();
+            dt.ajax.reload();
+            dt.order([0, 'asc']);
+            dt.draw()
+          }
+        },
+        {
+          //Export to CSV
+          extend: 'csvHtml5',
+          text: '<i class="fas fa-download"></i>Export CSV</button>'
+        },
+        {
+          //Export to XLS
+          extend: 'excelHtml5',
+          text: '<i class="fas fa-download"></i>Export XLS</button>'
+        }
+      ],
+      columnDefs: [
+      {
+        targets:3,
+        render: function(data, type, row){
+          var color='';
+          if(data >= 1000000000000 && data <= 5000000000000){
+            color = 'badge badge-warning';
+          }
+          else if(data > 5000000000000){
+            color = 'badge badge-danger';
+          }
+          return '<span class="' + color + '">' + data + '</span>';
+        }
+      },
+      {
+        targets:4,
+        render: function(data, type, row){
+          let emoji = new Map();
+          emoji.set('Fantasy', 'fas fa-fw fa-crown" style="color:#FFBF00;');
+          emoji.set('Science Fiction', 'fas fa-fw fa-robot" style="color:#999999;');
+          var message = '<i class="mr-2 ' + emoji.get(data.toString()) + '"></i> ';
+          message += data;
+          return message;
+        }
+      }],
+      ajax:{
+        url:'/api/books/',
+        dataSrc:function(json){
+          console.log("json= ", json);
+          return json['results'];
+        }
+      },
+      "columns": [
+        {"data":"title"},
+        {"data":"author_name"},
+        {"data":"summary"},
+        {"data":"isbn"},
+        {"data":"genre_name"},
+      ],
+      initComplete: function(){
+        datatablesBasic.buttons().container().appendTo("#datatables-basic_wrapper .col-md-6:eq(0)");
+      }
+    });
+  });
+</script>
+{% endblock %}

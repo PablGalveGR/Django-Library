@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  {% block title %}<title>Local Library</title>{% endblock %}
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/jquery.webui-popover/1.2.1/jquery/.webui-popover.min.css">
+  <!-- Add additional CSS in static file -->
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+  <link rel="stylesheet" href="{% static 'css/classic.css' %}">
+</head>
+<body>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-sm-2">
+      {% block sidebar %}
+      <nav class="sidebar sidebar-sticky">
+        <div class="sidebar-content  js-simplebar">
+          <a class="sidebar-brand" href="{% url 'index' %}">
+            <i class="align-middle" data-feather="box"></i>
+            <span class="align-middle">Library</span>
+          </a>
+          <ul class="sidebar-nav">
+            <li class="sidebar-item">
+              <a href="{% url 'index' %}" class="sidebar-link">
+                <i class="align-middle" data-feather="book-open"></i> <span class="align-middle">Home</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a href="{% url 'books' %}" class="sidebar-link">
+                <i class="align-middle" data-feather="book-open"></i> <span class="align-middle">All books</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a href="{% url 'authors' %}" class="sidebar-link">
+                <i class="align-middle" data-feather="book-open"></i> <span class="align-middle">All authors</span>
+              </a>
+            </li>
+          {% if user.is_authenticated %}
+            <li class="sidebar-item">
+              <a href="#panel" data-toggle="collapse" class="sidebar-link collapsed" aria-expanded="false">
+                <i class="align-middle" data-feather="book-open"></i> 
+                <span class="align-middle">User: {{ user.get_username }} {{user.groups.all.0}}</span>
+              </a>
+              <ul id="panel" class="sidebar-dropdown list-unstyled collapse ">
+		<li class="sidebar-item"><a class="sidebar-link" href="pages-profile.html">Profile</a></li>
+		<li class="sidebar-item"><a class="sidebar-link" href="pages-settings.html">Settings</a></li>
+		<li class="sidebar-item"><a class="sidebar-link" href="pages-clients.html">Clients <span class="sidebar-badge badge badge-primary">New</span></a></li>
+		<li class="sidebar-item"><a class="sidebar-link" href="pages-invoice.html">Invoice</a></li>
+		<li class="sidebar-item"><a class="sidebar-link" href="pages-pricing.html">Pricing</a></li>
+		<li class="sidebar-item"><a class="sidebar-link" href="pages-kanban.html">Kanban Board <span class="sidebar-badge badge badge-primary">New</span></a></li>
+		<li class="sidebar-item"><a class="sidebar-link" href="pages-blank.html">Blank Page</a></li>
+	      </ul>
+            </li>
+            <li class="sidebar-item">
+              <a href="{% url 'my-borrowed' %}" class="sidebar-link">
+                <i class="align-middle" data-feather="book-open"></i> <span class="align-middle">My Borrowed</span>
+              </a>
+            </li>
+            {% if perms.catalog.can_mark_returned or user.is_staff %}
+              <li class="sidebar-item">
+                <a href="{% url 'all-borrowed' %}" class="sidebar-link">
+                  <i class="align-middle" data-feather="book-open"></i> <span class="align-middle">Borrowed books</span>
+                </a>
+              </li>
+              <li class="sidebar-item">
+                <a href="{% url 'author-create' %}" class="sidebar-link">
+                  <i class="align-middle" data-feather="book-open"></i> <span class="align-middle">Add author</span>
+                </a>
+              </li>
+              <li class="sidebar-item">
+                <a href="{% url 'book-create' %}" class="sidebar-link">
+                  <i class="align-middle" data-feather="book-open"></i> <span class="align-middle">Add book</span>
+                </a>
+              </li>
+            {% endif %}
+            <li class="sidebar-item">
+              <a href="{% url 'logout'%}?next={{request.path}}" class="sidebar-link">
+                <i class="align-middle" data-feather="sliders"></i> <span class="align-middle">Logout</span>
+              </a>
+            </li>
+          {% else %}
+          <li class="sidebar-item">
+            <a href="{% url 'login'%}?next={{request.path}}" class="sidebar-link">
+              <i class="align-middle" data-feather="sliders"></i> <span class="align-middle">Login</span>
+            </a>
+          </li>
+          {% endif %}
+          </ul>
+     {% endblock %}
+        </div>
+        </nav>
+      </div>
+      <div class="col-sm-10 ">{% block content %}{% endblock %}
+        {% block pagination %}
+          {% if is_paginated %}
+            <div class="pagination">
+              <span class="page-links">
+                {% if page_obj.has_previous %}
+                  <a href="{{ request.path }}?page={{ page_obj.previous_page_number }}">previous</a>
+                {% endif %}
+                <span class="page-current">
+                  Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                </span>
+                {% if page_obj.has_next %}
+                  <a href="{{ request.path }}?page={{ page_obj.next_page_number }}">next</a>
+                {% endif %}
+              </span>
+            </div>
+          {% endif %}
+        {% endblock %}
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+<!--AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA-->
+

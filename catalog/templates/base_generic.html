@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  {% block title %}<title>Local Library</title>{% endblock %}
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="Responsive Bootstrap 4 Admin &amp; Dashboard Template">
+  <meta name="author" content="Bootlab">
+
+  <title>AppStack - Admin &amp; Dashboard Template</title>
+
+  <!-- PICK ONE OF THE STYLES BELOW -->
+  <!-- <link href="css/classic.css" rel="stylesheet"> -->
+  <!-- <link href="css/corporate.css" rel="stylesheet"> -->
+  <!-- <link href="css/modern.css" rel="stylesheet"> -->
+
+  <!-- BEGIN SETTINGS -->
+  <!-- You can remove this after picking a style -->
+  <style>
+    body {
+      opacity: 0;
+    }
+  </style>
+  <!-- Add additional CSS in static file -->
+  {% load static %}
+  <!--<link rel="stylesheet" href="{% static 'css/styles.css' %}">-->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+  <link rel="stylesheet" href="{% static 'css/corporate.css'%}">
+</head>
+
+<body>
+  <div class="wrapper">
+    {% block sidebar %}
+    <nav class="sidebar sidebar-sticky">
+      <div class="sidebar-content  js-simplebar">
+        <a class="sidebar-brand" href="{% url 'index' %}">
+          <i class="align-middle" data-feather="box"></i>
+          <span class="align-middle">Library</span>
+        </a>
+        <ul class="sidebar-nav">
+          <li class="sidebar-item">
+            <a href="{% url 'index' %}" class="sidebar-link">
+              <i class="align-middle" data-feather="home"></i>
+              <span class="align-middle">Home</span>
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a href="{% url 'books' %}" class="sidebar-link">
+              <i class="align-middle" data-feather="book"></i>
+              <span class="align-middle">All books</span>
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a href="{% url 'authors' %}" class="sidebar-link">
+              <i class="align-middle" data-feather="users"></i>
+              <span class="align-middle">All authors</span>
+            </a>
+          </li>
+          {% if user.is_authenticated %}
+          <li class="sidebar-item active ">
+            <a href="#panel" data-toggle="collapse" class="sidebar-link">
+              <i class="align-middle" data-feather="user"></i>
+              <span class="align-middle">User: {{ user.get_username }} {{user.groups.all.0}}</span>
+            </a>
+            <ul id="panel" class="sidebar-dropdown list-unstyled collapse show ">
+              <li class="sidebar-item">
+                <a href="{% url 'my-borrowed' %}" class="sidebar-link">
+                  <i class="align-middle" data-feather="book-open"></i>
+                  <span class="align-middle">My Borrowed</span>
+                </a>
+              </li>
+              {% if perms.catalog.can_mark_returned or user.is_staff %}
+              <li class="sidebar-item">
+                <a href="{% url 'all-borrowed' %}" class="sidebar-link">
+                  <i class="align-middle" data-feather="book"></i>
+                  <span class="align-middle">Borrowed books</span>
+                </a>
+              </li>
+              <li class="sidebar-item">
+                <a href="{% url 'author-create' %}" class="sidebar-link">
+                  <i class="align-middle" data-feather="user-plus"></i>
+                  <span class="align-middle">Add author</span>
+                </a>
+              </li>
+              <li class="sidebar-item">
+                <a href="{% url 'book-create' %}" class="sidebar-link">
+                  <i class="align-middle" data-feather="plus"></i>
+                  <i class="align-middle" data-feather="book"></i>
+                  <span class="align-middle">Add book</span>
+                </a>
+              </li>
+            </ul>
+          </li>
+          {% endif %}
+          <li class="sidebar-item">
+            <a href="{% url 'logout'%}?next={{request.path}}" class="sidebar-link">
+              <i class="align-middle" data-feather="log-out"></i>
+              <span class="align-middle">Logout</span>
+            </a>
+          </li>
+          {% else %}
+          <li class="sidebar-item">
+            <a href="{% url 'login'%}?next={{request.path}}" class="sidebar-link">
+              <i class="align-middle" data-feather="log-in"></i>
+              <span class="align-middle">Login</span>
+            </a>
+          </li>
+          {% endif %}
+        </ul>
+        {% endblock %}
+      </div>
+    </nav>
+    <div class="main ">{% block content %}{% endblock %}
+    </div>
+  </div>
+  <script type="module" src="{% static 'js/app.js'%}"></script>
+</body>
+
+</html>
+<!--AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA-->

@@ -1,0 +1,172 @@
+{% extends "base_generic.html" %}
+{% load static %}
+{% block content %}
+<main class="content">
+  <div class="container-fluid p-0">
+    <h1 class="h3 mb-3"></h1>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card">
+          <div class="card-header">
+            <h3>Book list</h3>
+          </div>
+          <div class="card-body">
+            <div id="datatables-basic_wrapper">
+              <div class="row">
+                <div class="col-sm-12">
+                  <table id="datatables-basic" class="table table-striped dataTable no-footer dtr-inline"
+                  style="width: 100%;" role="grid">
+                    <thead>
+                      <tr role="row">
+                        <th rowspan="1" colspan="1" name = "title">Book</th>
+                        <th rowspan="1" colspan="1" name = "author" >Author</th>
+                        <th rowspan="1" colspan="1" name ="summary">Summary</th>
+                        <th rowspan="1" colspan="1" name = "isbn">ISBN</th>
+                        <th rowspan="1" colspan="1" name = "genre">Genre</th>
+                      </tr>
+                    </thead>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+<script src="{% static 'js/app.js'%}"></script>
+<script type="text/javascript", language="javascript"
+src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script>
+  
+  $(function () {
+    // Datatables basic
+    var datatablesBasic = $("#datatables-basic").DataTable({
+      responsive: true,
+      processing:true,
+      serverSide: true,
+      buttons:[
+        {
+          //Update the table
+          text: '<i class="fas fa-sync-alt"></i>Update</button>',
+          action: function(e,dt, node, config){
+            dt.clear().draw();
+            dt.ajax.reload();
+            dt.order([0, 'asc']);
+            dt.draw()
+          }
+        },
+        {
+          //Export to CSV
+          extend: 'csvHtml5',
+          text: '<i class="fas fa-download buttons-csv"></i>Export CSV</button>',
+          filename: function(){
+            return 'Book list';
+          },
+          action: newexportaction
+        },
+        {
+          //Export to XLS
+          extend: 'excelHtml5',
+          text: '<i class="fas fa-download buttons-excel"></i>Export XLS</button>',
+          filename: function(){
+            return 'Book list';
+          },
+          action: newexportaction
+        },
+      ],
+      columnDefs: [
+      {
+        targets:0,
+        render: function(data, type, row){
+          let url = "/catalog/book/"+ row.id;
+          return '<a href="'+url+'">' + data + '</a>';
+        }
+      },
+      {
+        targets:1,
+        render: function(data, type, row){
+          let url = "/catalog/author/"+ row.author_id;
+          return '<a href="'+url+'">' + data + '</a>';
+        }
+      },
+      {
+        targets:3,
+        render: function(data, type, row){
+          var color='';
+          if(data >= 1000000000000 && data <= 5000000000000){
+            color = 'badge badge-warning';
+          }
+          else if(data > 5000000000000){
+            color = 'badge badge-danger';
+          }
+          return '<span class="' + color + '">' + data + '</span>';
+        }
+      },
+      {
+        targets:4,
+        render: function(data, type, row){
+          let emoji = new Map();
+          emoji.set('Fantasy', 'fas fa-fw fa-crown" style="color:#FFBF00;');
+          emoji.set('Science Fiction', 'fas fa-fw fa-robot" style="color:#999999;');
+          var message = '<i class="mr-2 ' + emoji.get(data.toString()) + '"></i> ';
+          message += data;
+          return message;
+        }
+      }],
+      ajax:{
+        url:'/api/books/',
+        dataSrc:function(json){
+          console.log("json= ", json);
+          return json['data'];
+        }
+      },
+      "columns": [
+        {"data":"title"},
+        {"data":"author_name"},
+        {"data":"summary"},
+        {"data":"isbn"},
+        {"data":"genre_name"},
+      ],
+      initComplete: function(){
+        datatablesBasic.buttons().container().appendTo("#datatables-basic_wrapper .col-md-6:eq(0)");
+      }
+    });
+  });
+  function newexportaction(e, dt, button, config) {
+    var self = this;
+    var oldStart = dt.settings()[0]._iDisplayStart;
+    dt.one('preXhr', function (e, s, data) {
+        // Just this once, load all data from the server...
+        data.start = 0;
+        data.length = 2147483647;
+        dt.one('preDraw', function (e, settings) {
+            // Call the original action function
+            if (button[0].className.indexOf('buttons-excel') >= 0) {
+                $.fn.dataTable.ext.buttons.excelHtml5.available(dt, config) ?
+                    $.fn.dataTable.ext.buttons.excelHtml5.action.call(self, e, dt, button, config) :
+                    $.fn.dataTable.ext.buttons.excelFlash.action.call(self, e, dt, button, config);
+            } else if (button[0].className.indexOf('buttons-csv') >= 0) {
+                $.fn.dataTable.ext.buttons.csvHtml5.available(dt, config) ?
+                    $.fn.dataTable.ext.buttons.csvHtml5.action.call(self, e, dt, button, config) :
+                    $.fn.dataTable.ext.buttons.csvFlash.action.call(self, e, dt, button, config);
+            }
+            dt.one('preXhr', function (e, s, data) {
+                // DataTables thinks the first item displayed is index 0, but we're not drawing that.
+                // Set the property to what it was before exporting.
+                settings._iDisplayStart = oldStart;
+                data.start = oldStart;
+            });
+            // Reload the grid with the original page. Otherwise, API functions like table.cell(this) don't work properly.
+            setTimeout(dt.ajax.reload, 0);
+            // Prevent rendering of the full data to the DOM
+            return false;
+        });
+    });
+    // Requery the server with the new one-time export settings
+    dt.ajax.reload();
+};
+
+</script>
+{% endblock %}
